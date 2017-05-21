@@ -1,0 +1,64 @@
+body {
+    -webkit-overflow-scrolling: touch;
+}
+
+.myNav {
+    border-bottom: medium solid rgb(60, 90, 150);
+}
+
+.myNav div {
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    /*for iphone*/
+    .myNav div {
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+    }
+}
+
+.myNav div a {
+    text-decoration: none;
+    color: black;
+}
+
+.myNav .active {
+    background-color: rgb(60, 90, 150);
+}
+
+.myNav .active a {
+    color: white
+}
+
+.glyphicon-star {
+    color: gold;
+}
+
+.glyphicon-search {
+    color: white;
+}
+
+/*details, left right slide*/
+/*https://docs.angularjs.org/api/ng/directive/ngShow#animations*/
+/*https://docs.angularjs.org/api/ng/directive/ngHide*/
+.queryAll.ng-hide-remove {
+    transform: translateX(100%);
+    transition: all 0.5s linear;
+}
+
+.queryAll.ng-hide-remove.ng-hide-remove-active {
+    transform: translateX(0);
+}
+
+.querySpecific.ng-hide-remove {
+    transform: translateX(-100%);
+    transition: all 0.5s linear;
+}
+
+.querySpecific.ng-hide-remove.ng-hide-remove-active {
+    transform: translateX(0);
+}
