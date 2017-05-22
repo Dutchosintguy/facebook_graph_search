@@ -19,6 +19,34 @@ window.fbAsyncInit = function () {
     fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));
 
+interface NodeData {
+    id: string,
+    name: string,
+    photoUrl: string
+}
+
+interface AllResponse {
+    data: NodeData[]
+}
+
+interface AlbumData {
+    name: string,
+    photos: {
+        url: string
+    }[]
+}
+
+interface PostData {
+    content: string,
+    time: string
+}
+
+interface SpecificResponse {
+    name: string,
+    albums: AlbumData[],
+    posts: PostData[]
+}
+
 angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $http) {
     $scope.coords = null;
     // follow the video, get coord at the beginning
@@ -60,25 +88,26 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
             url += `&latitude=${$scope.coords.latitude}&longitude=${$scope.coords.longitude}`
         }
 
-        function errorCallback(response) {
+        function errorCallback(response: string) {
             alert('error' + response);
         }
 
         $http.get(url + '&type=user').then(
-            function (response) {
+            function (response: {data: AllResponse}) {
                 $scope.nodes = {};
+                console.log(response);
                 $scope.nodes.users = response.data;
                 $http.get(url + '&type=page').then(
-                    function (response) {
+                    function (response: {data: AllResponse}) {
                         $scope.nodes.pages = response.data;
                         $http.get(url + '&type=event').then(
-                            function (response) {
+                            function (response: {data: AllResponse}) {
                                 $scope.nodes.events = response.data;
                                 $http.get(url + '&type=place').then(
-                                    function (response) {
+                                    function (response: {data: AllResponse}) {
                                         $scope.nodes.places = response.data;
                                         $http.get(url + '&type=group').then(
-                                            function (response) {
+                                            function (response: {data: AllResponse}) {
                                                 $scope.nodes.groups = response.data;
                                                 $scope.visibleItem.select('queryAll');
                                                 if ($scope.activeType === 'favorites') {
@@ -115,7 +144,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
     // keep track of favorites
     $scope.favorites = (localStorage.getItem('favorites') !== null) ? JSON.parse(localStorage.getItem('favorites')) : {};
 
-    $scope.isFavorite = function (node) {
+    $scope.isFavorite = function (node: NodeData) {
         for (const favoriteId in $scope.favorites) {
             if (node.id == favoriteId) { // use == because node.id is int while favoriteId is string
                 return true;
@@ -123,14 +152,14 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         }
         return false;
     };
-    $scope.toggleFavorite = function (node) {
+    $scope.toggleFavorite = function (node: NodeData) {
         if ($scope.isFavorite(node)) {
             $scope.unsetFavorite(node);
         } else {
             $scope.setFavorite(node);
         }
     };
-    $scope.setFavorite = function (node) {
+    $scope.setFavorite = function (node: NodeData) {
         $scope.favorites[node.id] = node;
         $scope.favorites[node.id]['type'] = $scope.activeType;
 
@@ -140,13 +169,13 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         // Example of using JSON.stringify() with localStorage
         localStorage.setItem('favorites', JSON.stringify($scope.favorites));
     };
-    $scope.unsetFavorite = function (node) {
+    $scope.unsetFavorite = function (node: NodeData) {
         delete $scope.favorites[node.id];
         localStorage.setItem('favorites', JSON.stringify($scope.favorites));
     };
 
 
-    $scope.detailsClicked = function (node) {
+    $scope.detailsClicked = function (node: NodeData) {
         $scope.activeNode = node;
         $scope.visibleItem.select('querySpecific');
         $scope.visibleItem.querySpecific.select('showProgressBar');
@@ -154,11 +183,12 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         $http({
             method: 'Get',
             url: 'http://sample-env.f7yg2xz9yp.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=specific&id=' + node.id
-        }).then(function successCallback(response) {
+        }).then(function successCallback(response: {data: SpecificResponse}) {
+                console.log(response);
                 $scope.visibleItem.select('querySpecific');
                 $scope.visibleItem.querySpecific.select('showResults');
                 $scope.detail = response.data;
-            }, function errorCallback(response) {
+            }, function errorCallback() {
                 alert('error');
             }
         );
@@ -271,7 +301,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         }
     }
 
-    $scope.postToFacebook = function (node) {
+    $scope.postToFacebook = function (node: NodeData) {
         // https://developers.facebook.com/docs/javascript/examples
         // Trigger a Share dialog
 
