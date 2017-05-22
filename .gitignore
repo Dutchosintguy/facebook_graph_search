@@ -1,2 +1,4 @@
 .idea
 private_data
+node_modules/*
+*.js

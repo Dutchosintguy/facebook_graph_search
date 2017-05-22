@@ -1,12 +1,12 @@
-https://developers.facebook.com/docs/javascript/quickstart
-    window.fbAsyncInit = function () {
-        FB.init({
-            appId: '177970666050443',
-            xfbml: true,
-            version: 'v2.8'
-        });
-        FB.AppEvents.logPageView();
-    };
+// https://developers.facebook.com/docs/javascript/quickstart
+window.fbAsyncInit = function () {
+    FB.init({
+        appId: '177970666050443',
+        xfbml: true,
+        version: 'v2.8'
+    });
+    FB.AppEvents.logPageView();
+};
 
 (function (d, s, id) {
     var js, fjs = d.getElementsByTagName(s)[0];
@@ -21,7 +21,7 @@ https://developers.facebook.com/docs/javascript/quickstart
 
 angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $http) {
     $scope.coords = null;
-    // follow the video, get coord at the begining
+    // follow the video, get coord at the beginning
     navigator.geolocation.getCurrentPosition(
         function success(pos) {
             $scope.coords = pos.coords;
@@ -32,7 +32,6 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
     );
 
     $scope.activeNode = null;
-
     $scope.keyword = '';
 
     $scope.clearClicked = function () {
@@ -55,11 +54,10 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         }
 
 
-        var url = 'http://sample-env.f7yg2xz9yp.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=all&keyword='
-            + $scope.keyword;
+        let url = `http://sample-env.f7yg2xz9yp.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
 
         if ($scope.coords !== null) {
-            url += '&latitude=' + $scope.coords.latitude + '&longitude=' + $scope.coords.longitude;
+            url += `&latitude=${$scope.coords.latitude}&longitude=${$scope.coords.longitude}`
         }
 
         function errorCallback(response) {
@@ -118,7 +116,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
     $scope.favorites = (localStorage.getItem('favorites') !== null) ? JSON.parse(localStorage.getItem('favorites')) : {};
 
     $scope.isFavorite = function (node) {
-        for (var favoriteId in $scope.favorites) {
+        for (const favoriteId in $scope.favorites) {
             if (node.id == favoriteId) { // use == because node.id is int while favoriteId is string
                 return true;
             }
@@ -258,7 +256,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         }
 
         $scope.nodes[$scope.activeType] = response.data;
-        for (var i = 0; i < $scope.nodes[$scope.activeType].data.length; ++i) {
+        for (let i = 0; i < $scope.nodes[$scope.activeType].data.length; ++i) {
             $scope.nodes[$scope.activeType].data[i].photoUrl = $scope.nodes[$scope.activeType].data[i].picture.data.url;
         }
 
@@ -295,7 +293,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         });
     };
 
-    var showAlbum = [true, false, false, false, false];
+    let showAlbum = [true, false, false, false, false];
 
     function showFirstAlbum() {
         showAlbum = [true, false, false, false, false];
@@ -308,7 +306,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
             return;
         }
 
-        for (var i = 0; i < 5; ++i) {
+        for (let i = 0; i < 5; ++i) {
             showAlbum[i] = false;
         }
 
@@ -319,7 +317,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
     }
 }).filter('notEmpty', function () { // http://stackoverflow.com/a/23396452
     return function (obj) {
-        for (var property in obj) {
+        for (const property in obj) {
             if (obj.hasOwnProperty(property)) {
                 return true;
             }

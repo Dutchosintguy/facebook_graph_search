@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "removeComments": true
+  },
+  "files": [
+    "fb_graph_search.ts"
+  ]
+}
