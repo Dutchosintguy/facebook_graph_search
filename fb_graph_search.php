@@ -8,7 +8,6 @@ class MyApp
 {
     function __construct()
     {
-
         $file = fopen('/home/ec2-user/private_data', 'r') or die('Unable to open private data file!');
         $privateDataJson = fread($file, filesize('/home/ec2-user/private_data'));
         fclose($file);
@@ -24,6 +23,8 @@ class MyApp
     private $fbAppSecret;
     private $googleApiKey;
     private $target;
+    private $keyword;
+    private $type;
 
     public function isTargetAll()
     {
@@ -34,10 +35,6 @@ class MyApp
     {
         return $this->target === 'specific';
     }
-
-    private $keyword;
-
-    private $type;
 
     public function typeEquals($type)
     {
@@ -527,17 +524,17 @@ $myApp->doFbQuery();
         clearInput.addEventListener('click', clear);
 
         var albumsLink = document.getElementById('albums-link');
-        if (albumsLink != null) {
+        if (albumsLink !== null) {
             albumsLink.addEventListener('click', toggleAlbums);
         }
 
         var postsLink = document.getElementById('posts-link');
-        if (postsLink != null) {
+        if (postsLink !== null) {
             postsLink.addEventListener('click', togglePosts);
         }
 
         var albumNameLinks = document.getElementsByClassName('album-name-links');
-        if (albumNameLinks != null) {
+        if (albumNameLinks !== null) {
             for (var i = 0; i < albumNameLinks.length; ++i) {
                 var albumNameLink = albumNameLinks[i];
                 albumNameLink.addEventListener('click', function () {
@@ -552,7 +549,7 @@ $myApp->doFbQuery();
     function selectionChanged() {
         var type = document.getElementById('type');
         var selectedValue = type.options[type.selectedIndex].value;
-        selectedValue == 'place' ? showLocationAndDistance() : hideLocationAndDistance();
+        selectedValue === 'place' ? showLocationAndDistance() : hideLocationAndDistance();
     }
 
     function showLocationAndDistance() {
@@ -581,7 +578,7 @@ $myApp->doFbQuery();
 
             function clearInput(id) {
                 var input = document.getElementById(id);
-                if (input != null) {
+                if (input !== null) {
                     input.value = '';
                 }
             }
@@ -622,7 +619,7 @@ $myApp->doFbQuery();
             albums.style.display = 'inherit';
 
             var posts = document.getElementById('posts');
-            if (posts != null) {
+            if (posts !== null) {
                 posts.style.display = 'none';
             }
         }
@@ -637,17 +634,10 @@ $myApp->doFbQuery();
             posts.style.display = 'inherit';
 
             var albums = document.getElementById('albums');
-            if (albums != null) {
+            if (albums !== null) {
                 albums.style.display = 'none';
             }
         }
-    }
-
-    function openNewWindowWithGivenImgUrl(imgUrl) {
-        var w = window.open();
-        w.document.open();
-        w.document.write('<img src="' + imgUrl + '">');
-        w.document.close();
     }
 </script>
 <noscript></noscript>
