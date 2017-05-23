@@ -1,3 +1,5 @@
+declare var FB;
+
 // https://developers.facebook.com/docs/javascript/quickstart
 window.fbAsyncInit = function () {
     FB.init({
@@ -22,7 +24,8 @@ window.fbAsyncInit = function () {
 interface NodeData {
     id: string,
     name: string,
-    photoUrl: string
+    photoUrl: string,
+    type?: string
 }
 
 interface AllResponse {
@@ -47,11 +50,59 @@ interface SpecificResponse {
     posts: PostData[]
 }
 
-angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $http) {
+interface AngularScope {
+    coords: Coordinates,
+    activeNode: NodeData,
+    nodes: {
+        users: AllResponse,
+        pages: AllResponse,
+        events: AllResponse,
+        places: AllResponse,
+        groups: AllResponse
+    },
+    keyword: string,
+    visibleItem: {
+        select: (arg: string) => void,
+        queryAll: {
+            select: (arg: string) => void,
+            isVisible: boolean,
+            showProgressBar: boolean,
+            showNodes: boolean,
+            showFavorites: boolean
+        },
+        querySpecific: {
+            select: (arg: string) => void,
+            isVisible: boolean,
+            showProgressBar: boolean,
+            showResults: boolean
+        }
+    },
+    favorites: NodeData[],
+    activeType: string,
+    detail: SpecificResponse,
+
+    clearClicked: () => void,
+    searchClicked: () => void,
+    detailsClicked: (node: NodeData) => void,
+    backClicked: () => void,
+    typeClicked: (type: string) => void,
+    nextClicked: () => void,
+    previousClicked: () => void,
+    albumClicked: (index: number) => void
+
+    isFavorite: (node: NodeData) => boolean,
+    toggleFavorite: (node: NodeData) => void,
+    setFavorite: (node: NodeData) => void,
+    unsetFavorite: (node: NodeData) => void,
+    postToFacebook: (node: NodeData) => void,
+    shouldShowAlbum: (index: number) => void
+}
+
+angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: AngularScope, $http) {
     $scope.coords = null;
     // follow the video, get coord at the beginning
     navigator.geolocation.getCurrentPosition(
-        function success(pos) {
+        function success(pos: {coords: Coordinates}) {
             $scope.coords = pos.coords;
         },
         function error(err) {
@@ -61,6 +112,39 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
 
     $scope.activeNode = null;
     $scope.keyword = '';
+    $scope.visibleItem = {
+        select: function (arg: string) {
+            this.queryAll.isVisible = false;
+            this.querySpecific.isVisible = false;
+
+            this[arg].isVisible = true;
+        },
+
+        queryAll: {
+            select: function (arg: string) {
+                this.showProgressBar = false;
+                this.showNodes = false;
+                this.showFavorites = false;
+
+                this[arg] = true
+            },
+            isVisible: true,
+            showProgressBar: false,
+            showNodes: true,
+            showFavorites: false
+        },
+        querySpecific: {
+            select: function (arg) {
+                this.showProgressBar = false;
+                this.showResults = false;
+
+                this[arg] = true;
+            },
+            isVisible: false,
+            showProgressBar: false,
+            showResults: true
+        }
+    };
 
     $scope.clearClicked = function () {
         $scope.keyword = '';
@@ -95,7 +179,6 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         $http.get(url + '&type=user').then(
             function (response: {data: AllResponse}) {
                 $scope.nodes = {};
-                console.log(response);
                 $scope.nodes.users = response.data;
                 $http.get(url + '&type=page').then(
                     function (response: {data: AllResponse}) {
@@ -160,8 +243,8 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         }
     };
     $scope.setFavorite = function (node: NodeData) {
-        $scope.favorites[node.id] = node;
-        $scope.favorites[node.id]['type'] = $scope.activeType;
+        $scope.favorites[Number(node.id)] = node;
+        $scope.favorites[Number(node.id)].type = $scope.activeType;
 
         // save to localStorage
         // https://www.w3schools.com/html/html5_webstorage.asp
@@ -184,7 +267,6 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
             method: 'Get',
             url: 'http://sample-env.f7yg2xz9yp.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=specific&id=' + node.id
         }).then(function successCallback(response: {data: SpecificResponse}) {
-                console.log(response);
                 $scope.visibleItem.select('querySpecific');
                 $scope.visibleItem.querySpecific.select('showResults');
                 $scope.detail = response.data;
@@ -205,42 +287,8 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         }
     };
 
-    $scope.visibleItem = {
-        select: function (arg) {
-            this.queryAll.isVisible = false;
-            this.querySpecific.isVisible = false;
-
-            this[arg].isVisible = true;
-        },
-
-        queryAll: {
-            select: function (arg) {
-                this.showProgressBar = false;
-                this.showNodes = false;
-                this.showFavorites = false;
-
-                this[arg] = true
-            },
-            isVisible: true,
-            showProgressBar: false,
-            showNodes: true,
-            showFavorites: false
-        },
-        querySpecific: {
-            select: function (arg) {
-                this.showProgressBar = false;
-                this.showResults = false;
-
-                this[arg] = true;
-            },
-            isVisible: false,
-            showProgressBar: false,
-            showResults: true
-        }
-    };
-
     $scope.activeType = 'users';
-    $scope.typeClicked = function (type) {
+    $scope.typeClicked = function (type: string) {
         $scope.activeType = type;
 
         if (type === 'favorites') {
@@ -255,7 +303,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
     };
 
     $scope.nextClicked = function () {
-        function errorCallback(response) {
+        function errorCallback(response: string) {
             alert('error' + response);
         }
 
@@ -267,7 +315,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
     };
 
     $scope.previousClicked = function () {
-        function errorCallback(response) {
+        function errorCallback(response: string) {
             alert('error' + response);
         }
 
@@ -313,7 +361,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
             picture: node.photoUrl,
             name: node.name,
             caption: 'FB SEARCH FROM USC CSCI571'
-        }, function (response) {
+        }, function (response: any) {
             if (response && !response.error_message) {
                 alert('Posted Successfully');
             }
@@ -329,7 +377,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
         showAlbum = [true, false, false, false, false];
     }
 
-    $scope.albumClicked = function (index) {
+    $scope.albumClicked = function (index: number) {
         if (showAlbum[index]) {
             // fold opened album
             showAlbum[index] = false;
@@ -342,11 +390,11 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
 
         showAlbum[index] = true;
     };
-    $scope.shouldShowAlbum = function (index) {
+    $scope.shouldShowAlbum = function (index: number) {
         return showAlbum[index];
     }
 }).filter('notEmpty', function () { // http://stackoverflow.com/a/23396452
-    return function (obj) {
+    return function (obj: object) {
         for (const property in obj) {
             if (obj.hasOwnProperty(property)) {
                 return true;
@@ -362,7 +410,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope, $h
             link: function (scope, element, attrs) {
 //                         https://docs.angularjs.org/api/ng/type/$rootScope.Scope
 //                         $watch
-                scope.$watch(attrs.mySlide, function (newValue, oldValue) {
+                scope.$watch(attrs.mySlide, function (newValue) {
 //                     newValue: new value of the expression of data-my-slide
 //                     data-my-slide="THIS EXPRESSION"
                     if (newValue) {
