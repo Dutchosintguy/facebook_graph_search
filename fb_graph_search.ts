@@ -50,33 +50,82 @@ interface SpecificResponse {
     posts: PostData[]
 }
 
+class Nodes {
+    users: AllResponse;
+    pages: AllResponse;
+    events: AllResponse;
+    places: AllResponse;
+    groups: AllResponse;
+    [index: string]: AllResponse;
+}
+
+class VisibleItem {
+    constructor() {
+        this.queryAll = new QueryAll();
+        this.querySpecific = new QuerySpecific();
+    }
+
+    select(arg: string) {
+        this.queryAll.isVisible = false;
+        this.querySpecific.isVisible = false;
+
+        this[arg].isVisible = true;
+    }
+
+    queryAll: QueryAll;
+    querySpecific: QuerySpecific;
+    [index: string]: any;
+}
+
+class QueryAll {
+    constructor() {
+        this.isVisible = true;
+        this.showProgressBar = false;
+        this.showNodes = true;
+        this.showFavorites = false;
+    }
+
+    select(arg: string) {
+        this.showProgressBar = false;
+        this.showNodes = false;
+        this.showFavorites = false;
+
+        this[arg] = true
+    }
+
+    isVisible: boolean;
+    showProgressBar: boolean;
+    showNodes: boolean;
+    showFavorites: boolean;
+    [index: string]: any;
+}
+
+class QuerySpecific {
+    constructor() {
+        this.isVisible = false;
+        this.showProgressBar = false;
+        this.showResults = true;
+    }
+
+    select(arg: string) {
+        this.showProgressBar = false;
+        this.showResults = false;
+
+        this[arg] = true;
+    }
+
+    isVisible: boolean;
+    showProgressBar: boolean;
+    showResults: boolean;
+    [index: string]: any;
+}
+
 interface AngularScope {
     coords: Coordinates,
     activeNode: NodeData,
-    nodes: {
-        users: AllResponse,
-        pages: AllResponse,
-        events: AllResponse,
-        places: AllResponse,
-        groups: AllResponse
-    },
+    nodes: Nodes,
     keyword: string,
-    visibleItem: {
-        select: (arg: string) => void,
-        queryAll: {
-            select: (arg: string) => void,
-            isVisible: boolean,
-            showProgressBar: boolean,
-            showNodes: boolean,
-            showFavorites: boolean
-        },
-        querySpecific: {
-            select: (arg: string) => void,
-            isVisible: boolean,
-            showProgressBar: boolean,
-            showResults: boolean
-        }
-    },
+    visibleItem: VisibleItem,
     favorites: NodeData[],
     activeType: string,
     detail: SpecificResponse,
@@ -102,7 +151,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
     $scope.coords = null;
     // follow the video, get coord at the beginning
     navigator.geolocation.getCurrentPosition(
-        function success(pos: {coords: Coordinates}) {
+        function success(pos: { coords: Coordinates }) {
             $scope.coords = pos.coords;
         },
         function error(err) {
@@ -112,39 +161,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
 
     $scope.activeNode = null;
     $scope.keyword = '';
-    $scope.visibleItem = {
-        select: function (arg: string) {
-            this.queryAll.isVisible = false;
-            this.querySpecific.isVisible = false;
-
-            this[arg].isVisible = true;
-        },
-
-        queryAll: {
-            select: function (arg: string) {
-                this.showProgressBar = false;
-                this.showNodes = false;
-                this.showFavorites = false;
-
-                this[arg] = true
-            },
-            isVisible: true,
-            showProgressBar: false,
-            showNodes: true,
-            showFavorites: false
-        },
-        querySpecific: {
-            select: function (arg) {
-                this.showProgressBar = false;
-                this.showResults = false;
-
-                this[arg] = true;
-            },
-            isVisible: false,
-            showProgressBar: false,
-            showResults: true
-        }
-    };
+    $scope.visibleItem = new VisibleItem();
 
     $scope.clearClicked = function () {
         $scope.keyword = '';
@@ -165,7 +182,6 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             return;
         }
 
-
         let url = `http://sample-env.f7yg2xz9yp.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
 
         if ($scope.coords !== null) {
@@ -177,20 +193,20 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
         }
 
         $http.get(url + '&type=user').then(
-            function (response: {data: AllResponse}) {
-                $scope.nodes = {};
+            function (response: { data: AllResponse }) {
+                $scope.nodes = new Nodes();
                 $scope.nodes.users = response.data;
                 $http.get(url + '&type=page').then(
-                    function (response: {data: AllResponse}) {
+                    function (response: { data: AllResponse }) {
                         $scope.nodes.pages = response.data;
                         $http.get(url + '&type=event').then(
-                            function (response: {data: AllResponse}) {
+                            function (response: { data: AllResponse }) {
                                 $scope.nodes.events = response.data;
                                 $http.get(url + '&type=place').then(
-                                    function (response: {data: AllResponse}) {
+                                    function (response: { data: AllResponse }) {
                                         $scope.nodes.places = response.data;
                                         $http.get(url + '&type=group').then(
-                                            function (response: {data: AllResponse}) {
+                                            function (response: { data: AllResponse }) {
                                                 $scope.nodes.groups = response.data;
                                                 $scope.visibleItem.select('queryAll');
                                                 if ($scope.activeType === 'favorites') {
@@ -266,7 +282,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
         $http({
             method: 'Get',
             url: 'http://sample-env.f7yg2xz9yp.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=specific&id=' + node.id
-        }).then(function successCallback(response: {data: SpecificResponse}) {
+        }).then(function successCallback(response: { data: SpecificResponse }) {
                 $scope.visibleItem.select('querySpecific');
                 $scope.visibleItem.querySpecific.select('showResults');
                 $scope.detail = response.data;
