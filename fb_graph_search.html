@@ -117,7 +117,7 @@
                             <tbody>
                             <tr ng-repeat="node in nodes[activeType].data">
                                 <td><strong>{{ $index + 1 }}</strong></td> <!-- start from 1, not 0 -->
-                                <td><img class="img-circle" width="40px" height="40px" ng-src="{{ node.photoUrl }}">
+                                <td><img class="img-circle" width="40px" height="40px" ng-src="{{ node.picture.data.url }}">
                                 </td>
                                 <td>{{ node.name }}</td>
                                 <td>
@@ -143,12 +143,12 @@
                     </div>
 
                     <div style="text-align: center;">
-                        <button ng-if="nodes[activeType].previous" ng-click="previousClicked()" type="button"
-                                class="btn btn-default" style="width: 100px; margin: auto 10px;">
+                        <button ng-if="nodes[activeType].paging && nodes[activeType].paging.previous"
+                                ng-click="previousClicked()" type="button" class="btn btn-default" style="width: 100px; margin: auto 10px;">
                             Previous
                         </button>
-                        <button ng-if="nodes[activeType].next" ng-click="nextClicked()" type="button"
-                                class="btn btn-default" style="width: 100px; margin: auto 10px;">
+                        <button ng-if="nodes[activeType].paging && nodes[activeType].paging.next"
+                                ng-click="nextClicked()" type="button" class="btn btn-default" style="width: 100px; margin: auto 10px;">
                             Next
                         </button>
                     </div>
@@ -172,7 +172,7 @@
                         <tbody>
                         <tr ng-repeat="favorite in favorites">
                             <td><strong>{{ $index + 1 }}</strong></td> <!--start from 1, not 0-->
-                            <td><img class="img-circle" width="40px" height="40px" ng-src="{{ favorite.photoUrl }}">
+                            <td><img class="img-circle" width="40px" height="40px" ng-src="{{ favorite.picture.data.url }}">
                             </td>
                             <td>{{ favorite.name }}</td>
                             <td>{{ favorite.type }}</td>
@@ -272,7 +272,7 @@
                                                 <table>
                                                     <tr>
                                                         <td style="padding-right: 10px;">
-                                                            <img width="40px" height="40px" ng-src="{{ activeNode.photoUrl }}">
+                                                            <img width="40px" height="40px" ng-src="{{ activeNode.picture.data.url }}">
                                                         </td>
                                                         <td>
                                                             <strong>{{ detail.name }}</strong> <br>

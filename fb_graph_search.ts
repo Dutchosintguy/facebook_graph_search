@@ -24,12 +24,20 @@ window.fbAsyncInit = function () {
 interface NodeData {
     id: string,
     name: string,
-    photoUrl: string,
-    type?: string
+    picture: {
+        data: {
+            url: string
+        }
+    },
+    type?: string,
 }
 
 interface AllResponse {
-    data: NodeData[]
+    data: NodeData[],
+    paging?: {
+        previous?: string,
+        next?: string
+    }
 }
 
 interface AlbumData {
@@ -196,6 +204,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             function (response: { data: AllResponse }) {
                 $scope.nodes = new Nodes();
                 $scope.nodes.users = response.data;
+                console.log($scope.nodes.users);
                 $http.get(url + '&type=page').then(
                     function (response: { data: AllResponse }) {
                         $scope.nodes.pages = response.data;
@@ -269,7 +278,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
         localStorage.setItem('favorites', JSON.stringify($scope.favorites));
     };
     $scope.unsetFavorite = function (node: NodeData) {
-        delete $scope.favorites[node.id];
+        delete $scope.favorites[Number(node.id)];
         localStorage.setItem('favorites', JSON.stringify($scope.favorites));
     };
 
@@ -323,8 +332,8 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             alert('error' + response);
         }
 
-        $http.get($scope.nodes[$scope.activeType].next).then(function (response) {
-            updateNodesData(response);
+        $http.get($scope.nodes[$scope.activeType].paging.next).then(function (response: { data: AllResponse }) {
+            updateNodesData(response.data);
             $scope.visibleItem.queryAll.select('showNodes');
         }, errorCallback);
         $scope.visibleItem.queryAll.select('showProgressBar');
@@ -335,34 +344,21 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             alert('error' + response);
         }
 
-        $http.get($scope.nodes[$scope.activeType].previous).then(function (response) {
-            updateNodesData(response);
+        $http.get($scope.nodes[$scope.activeType].paging.previous).then(function (response: { data: AllResponse }) {
+            updateNodesData(response.data);
             $scope.visibleItem.queryAll.select('showNodes');
         }, errorCallback);
         $scope.visibleItem.queryAll.select('showProgressBar');
     };
 
-    function updateNodesData(response) {
-        if (response.data.data.length === 0) {
+    function updateNodesData(response: AllResponse) {
+        if (response.data.length === 0) {
             // maybe bug of fb api, do nothing
             alert('bug of fb, no data in next page');
             return;
         }
 
-        $scope.nodes[$scope.activeType] = response.data;
-        for (let i = 0; i < $scope.nodes[$scope.activeType].data.length; ++i) {
-            $scope.nodes[$scope.activeType].data[i].photoUrl = $scope.nodes[$scope.activeType].data[i].picture.data.url;
-        }
-
-        if ($scope.nodes[$scope.activeType]['paging'] !== undefined) {
-            if ($scope.nodes[$scope.activeType]['paging']['previous'] !== undefined) {
-                $scope.nodes[$scope.activeType]['previous'] = $scope.nodes[$scope.activeType]['paging']['previous'];
-            }
-
-            if ($scope.nodes[$scope.activeType]['paging']['next'] !== undefined) {
-                $scope.nodes[$scope.activeType]['next'] = $scope.nodes[$scope.activeType]['paging']['next'];
-            }
-        }
+        $scope.nodes[$scope.activeType] = response;
     }
 
     $scope.postToFacebook = function (node: NodeData) {
@@ -374,7 +370,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             link: window.location.href,
             // the below one should be correct, but since the result is a redirect, it cannot be used
             // link: 'https://www.facebook.com/' + node.id,
-            picture: node.photoUrl,
+            picture: node.picture.data.url,
             name: node.name,
             caption: 'FB SEARCH FROM USC CSCI571'
         }, function (response: any) {

@@ -111,30 +111,9 @@ class FbGraphSearch
             //   }
             // }
 
-            $fbData = (!empty($fbArray['data'])) ? $fbArray['data'] : null;
-
-            $result = [];
-            $result['data'] = $this->getNodesData($fbData);
-
-            if (!empty($fbArray['paging'])) {
-                if (!empty($fbArray['paging']['next'])) {
-                    $result['next'] = $fbArray['paging']['next'];
-                }
-            }
-
+            $result = $fbArray;
             header('Content-type: application/json');
             echo(json_encode($result));
-            // {
-            //   "data": {
-            //   [
-            //     {
-            //       "id": id,
-            //       "name": name,
-            //       "photoUrl": url
-            //     }
-            //   ],
-            //   "next": url fro returning next 25 json data
-            // }
         } catch (Facebook\Exceptions\FacebookResponseException $e) {
             // When Graph returns an error
             // TODO let client know
@@ -230,28 +209,6 @@ class FbGraphSearch
             // When validation fails or other local issues
             die("Facebook SDK returned an error: {$e->getMessage()}");
         }
-    }
-
-    private function getNodesData($fbData)
-    {
-        $nodesData = null;
-        if ($fbData !== null) {
-            $nodesData = [];
-            foreach ($fbData as $data) {
-                $id = $data['id'];
-                $name = $data['name'];
-                $photoUrl = $data['picture']['data']['url'];
-                $nodesData[] = ['id' => $id, 'name' => $name, 'photoUrl' => $photoUrl];
-            }
-        }
-        return $nodesData;
-        // [
-        //   {
-        //     "id": id,
-        //     "name": name,
-        //     "photoUrl": url
-        //   }
-        // ]
     }
 
     private function getAlbums($albumsData)
