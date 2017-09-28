@@ -197,7 +197,8 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
         }
 
         function errorCallback(response: string) {
-            alert('error' + response);
+            alert('error');
+            console.log(response);
         }
 
         $http.get(url + '&type=user').then(
@@ -329,7 +330,8 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
 
     $scope.nextClicked = function () {
         function errorCallback(response: string) {
-            alert('error' + response);
+            alert('error');
+            console.log(response)
         }
 
         $http.get($scope.nodes[$scope.activeType].paging.next).then(function (response: { data: AllResponse }) {
@@ -341,7 +343,8 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
 
     $scope.previousClicked = function () {
         function errorCallback(response: string) {
-            alert('error' + response);
+            alert('error');
+            console.log(response)
         }
 
         $http.get($scope.nodes[$scope.activeType].paging.previous).then(function (response: { data: AllResponse }) {
