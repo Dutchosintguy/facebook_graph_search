@@ -1,26 +1,3 @@
-declare var FB;
-
-// https://developers.facebook.com/docs/javascript/quickstart
-window.fbAsyncInit = function () {
-    FB.init({
-        appId: '177970666050443',
-        xfbml: true,
-        version: 'v2.8'
-    });
-    FB.AppEvents.logPageView();
-};
-
-(function (d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) {
-        return;
-    }
-    js = d.createElement(s);
-    js.id = id;
-    js.src = "//connect.facebook.net/en_US/sdk.js";
-    fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
-
 interface NodeData {
     id: string,
     name: string,
@@ -363,28 +340,6 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
 
         $scope.nodes[$scope.activeType] = response;
     }
-
-    $scope.postToFacebook = function (node: NodeData) {
-        // https://developers.facebook.com/docs/javascript/examples
-        // Trigger a Share dialog
-
-        FB.ui({
-            method: 'feed',
-            link: window.location.href,
-            // the below one should be correct, but since the result is a redirect, it cannot be used
-            // link: 'https://www.facebook.com/' + node.id,
-            picture: node.picture.data.url,
-            name: node.name,
-            caption: 'FB SEARCH FROM USC CSCI571'
-        }, function (response: any) {
-            if (response && !response.error_message) {
-                alert('Posted Successfully');
-            }
-            else {
-                alert('Not Posted');
-            }
-        });
-    };
 
     let showAlbum = [true, false, false, false, false];
 
