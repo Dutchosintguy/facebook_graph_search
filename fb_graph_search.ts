@@ -106,7 +106,6 @@ class QuerySpecific {
 }
 
 interface AngularScope {
-    coords: Coordinates,
     activeNode: NodeData,
     nodes: Nodes,
     keyword: string,
@@ -133,17 +132,6 @@ interface AngularScope {
 }
 
 angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: AngularScope, $http) {
-    $scope.coords = null;
-    // follow the video, get coord at the beginning
-    navigator.geolocation.getCurrentPosition(
-        function success(pos: { coords: Coordinates }) {
-            $scope.coords = pos.coords;
-        },
-        function error(err) {
-            alert('Unable to get your location, will proceed without it. Error: ' + err);
-        }
-    );
-
     $scope.activeNode = null;
     $scope.keyword = '';
     $scope.visibleItem = new VisibleItem();
@@ -168,10 +156,6 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
         }
 
         let url = `http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
-
-        if ($scope.coords !== null) {
-            url += `&latitude=${$scope.coords.latitude}&longitude=${$scope.coords.longitude}`
-        }
 
         function errorCallback(response: string) {
             alert('error');
