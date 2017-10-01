@@ -190,7 +190,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             return;
         }
 
-        let url = `http://sample-env.f7yg2xz9yp.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
+        let url = `http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
 
         if ($scope.coords !== null) {
             url += `&latitude=${$scope.coords.latitude}&longitude=${$scope.coords.longitude}`
@@ -291,7 +291,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
 
         $http({
             method: 'Get',
-            url: 'http://sample-env.f7yg2xz9yp.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=specific&id=' + node.id
+            url: 'http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=specific&id=' + node.id
         }).then(function successCallback(response: { data: SpecificResponse }) {
                 $scope.visibleItem.select('querySpecific');
                 $scope.visibleItem.querySpecific.select('showResults');
