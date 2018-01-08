@@ -1,0 +1,24 @@
+{
+  "name": "facebook_graph_search",
+  "version": "1.0.0",
+  "description": "",
+  "main": "fb_graph_search.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YJ83Lee/facebook_graph_search.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YJ83Lee/facebook_graph_search/issues"
+  },
+  "homepage": "https://github.com/YJ83Lee/facebook_graph_search#readme",
+  "devDependencies": {
+    "@types/angular": "^1.6.40",
+    "@types/jquery": "^3.2.17"
+  }
+}

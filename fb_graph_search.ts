@@ -75,7 +75,7 @@ class QueryAll {
         this.showNodes = false;
         this.showFavorites = false;
 
-        this[arg] = true
+        this[arg] = true;
     }
 
     isVisible: boolean;
@@ -106,8 +106,8 @@ class QuerySpecific {
 }
 
 interface AngularScope {
-    activeNode: NodeData,
-    nodes: Nodes,
+    activeNode: NodeData | null,
+    nodes: Nodes | null,
     keyword: string,
     visibleItem: VisibleItem,
     favorites: NodeData[],
@@ -155,7 +155,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             return;
         }
 
-        let url = `http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
+        let url = `http://facebookgraphsearch-env.qictgezgwg.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
 
         function errorCallback(response: string) {
             alert('error');
@@ -169,36 +169,49 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
                 console.log($scope.nodes.users);
                 $http.get(url + '&type=page').then(
                     function (response: { data: AllResponse }) {
+                        if ($scope.nodes === null) {
+                            return;
+                        }
                         $scope.nodes.pages = response.data;
                         $http.get(url + '&type=event').then(
                             function (response: { data: AllResponse }) {
+                                if ($scope.nodes === null) {
+                                    return;
+                                }
                                 $scope.nodes.events = response.data;
                                 $http.get(url + '&type=place').then(
                                     function (response: { data: AllResponse }) {
+                                        if ($scope.nodes === null) {
+                                            return;
+                                        }
                                         $scope.nodes.places = response.data;
                                         $http.get(url + '&type=group').then(
                                             function (response: { data: AllResponse }) {
+                                                if ($scope.nodes === null) {
+                                                    return;
+                                                }
                                                 $scope.nodes.groups = response.data;
                                                 $scope.visibleItem.select('queryAll');
                                                 if ($scope.activeType === 'favorites') {
-                                                    $scope.visibleItem.queryAll.select('showFavorites');
+                                                    $scope.visibleItem.queryAll.select(
+                                                        'showFavorites');
                                                 } else {
                                                     $scope.visibleItem.queryAll.select('showNodes');
                                                 }
                                             },
-                                            errorCallback
+                                            errorCallback,
                                         );
                                     },
-                                    errorCallback
+                                    errorCallback,
                                 );
                             },
-                            errorCallback
+                            errorCallback,
                         );
                     },
-                    errorCallback
+                    errorCallback,
                 );
             },
-            errorCallback
+            errorCallback,
         );
 
         $scope.visibleItem.select('queryAll');
@@ -212,7 +225,11 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
     };
 
     // keep track of favorites
-    $scope.favorites = (localStorage.getItem('favorites') !== null) ? JSON.parse(localStorage.getItem('favorites')) : {};
+    const favorites = localStorage.getItem('favorites');
+    $scope.favorites = (favorites !== null) ? JSON.parse(favorites) : {};
+    // $scope.favorites = (localStorage.getItem('favorites') !== null)
+    //     ? JSON.parse(localStorage.getItem('favorites'))
+    //     : {};
 
     $scope.isFavorite = function (node: NodeData) {
         for (const favoriteId in $scope.favorites) {
@@ -251,15 +268,15 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
         $scope.visibleItem.querySpecific.select('showProgressBar');
 
         $http({
-            method: 'Get',
-            url: 'http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=specific&id=' + node.id
-        }).then(function successCallback(response: { data: SpecificResponse }) {
-                $scope.visibleItem.select('querySpecific');
-                $scope.visibleItem.querySpecific.select('showResults');
-                $scope.detail = response.data;
-            }, function errorCallback() {
-                alert('error');
-            }
+                  method: 'Get',
+                  url: 'http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=specific&id=' + node.id,
+              }).then(function successCallback(response: { data: SpecificResponse }) {
+                          $scope.visibleItem.select('querySpecific');
+                          $scope.visibleItem.querySpecific.select('showResults');
+                          $scope.detail = response.data;
+                      }, function errorCallback() {
+                          alert('error');
+                      },
         );
     };
 
@@ -292,10 +309,14 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
     $scope.nextClicked = function () {
         function errorCallback(response: string) {
             alert('error');
-            console.log(response)
+            console.log(response);
         }
 
-        $http.get($scope.nodes[$scope.activeType].paging.next).then(function (response: { data: AllResponse }) {
+        if ($scope.nodes === null) {
+            return;
+        }
+
+        $http.get($scope.nodes[$scope.activeType].paging!.next).then(function (response: { data: AllResponse }) {
             updateNodesData(response.data);
             $scope.visibleItem.queryAll.select('showNodes');
         }, errorCallback);
@@ -305,10 +326,14 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
     $scope.previousClicked = function () {
         function errorCallback(response: string) {
             alert('error');
-            console.log(response)
+            console.log(response);
         }
 
-        $http.get($scope.nodes[$scope.activeType].paging.previous).then(function (response: { data: AllResponse }) {
+        if ($scope.nodes === null) {
+            return;
+        }
+
+        $http.get($scope.nodes[$scope.activeType].paging!.previous).then(function (response: { data: AllResponse }) {
             updateNodesData(response.data);
             $scope.visibleItem.queryAll.select('showNodes');
         }, errorCallback);
@@ -319,6 +344,10 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
         if (response.data.length === 0) {
             // maybe bug of fb api, do nothing
             alert('bug of fb, no data in next page');
+            return;
+        }
+
+        if ($scope.nodes === null) {
             return;
         }
 
@@ -346,7 +375,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
     };
     $scope.shouldShowAlbum = function (index: number) {
         return showAlbum[index];
-    }
+    };
 }).filter('notEmpty', function () { // http://stackoverflow.com/a/23396452
     return function (obj: object) {
         for (const property in obj) {
@@ -355,18 +384,18 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             }
         }
         return false;
-    }
+    };
 }).directive('mySlide', [
     // http://ng-learn.org/2014/01/Dom-Manipulations/
     function () {
         return {
             restriction: 'A',
             link: function (scope, element, attrs) {
-//                         https://docs.angularjs.org/api/ng/type/$rootScope.Scope
-//                         $watch
+                //                         https://docs.angularjs.org/api/ng/type/$rootScope.Scope
+                //                         $watch
                 scope.$watch(attrs.mySlide, function (newValue) {
-//                     newValue: new value of the expression of data-my-slide
-//                     data-my-slide="THIS EXPRESSION"
+                    //                     newValue: new value of the expression of data-my-slide
+                    //                     data-my-slide="THIS EXPRESSION"
                     if (newValue) {
                         return jQuery(element).slideDown();
                         // return element.slideDown();
@@ -374,8 +403,8 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
                         return jQuery(element).slideUp();
                         // return element.slideUp();
                     }
-                })
-            }
-        }
-    }
+                });
+            },
+        };
+    },
 ]);

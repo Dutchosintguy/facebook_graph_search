@@ -1,7 +1,7 @@
 .idea
 private_data
-node_modules/*
+*.bak
+node_modules
 *.js
 composer.lock
-node_modules/
 vendor/
