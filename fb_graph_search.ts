@@ -155,63 +155,58 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             return;
         }
 
-        let url = `http://facebookgraphsearch-env.qictgezgwg.us-west-1.elasticbeanstalk.com/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
+        let url = `http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
 
         function errorCallback(response: string) {
             alert('error');
             console.log(response);
         }
 
-        $http.get(url + '&type=user').then(
-            function (response: { data: AllResponse }) {
-                $scope.nodes = new Nodes();
-                $scope.nodes.users = response.data;
-                console.log($scope.nodes.users);
-                $http.get(url + '&type=page').then(
-                    function (response: { data: AllResponse }) {
-                        if ($scope.nodes === null) {
-                            return;
-                        }
-                        $scope.nodes.pages = response.data;
-                        $http.get(url + '&type=event').then(
-                            function (response: { data: AllResponse }) {
-                                if ($scope.nodes === null) {
-                                    return;
-                                }
-                                $scope.nodes.events = response.data;
-                                $http.get(url + '&type=place').then(
-                                    function (response: { data: AllResponse }) {
-                                        if ($scope.nodes === null) {
-                                            return;
-                                        }
-                                        $scope.nodes.places = response.data;
-                                        $http.get(url + '&type=group').then(
-                                            function (response: { data: AllResponse }) {
-                                                if ($scope.nodes === null) {
-                                                    return;
-                                                }
-                                                $scope.nodes.groups = response.data;
-                                                $scope.visibleItem.select('queryAll');
-                                                if ($scope.activeType === 'favorites') {
-                                                    $scope.visibleItem.queryAll.select(
-                                                        'showFavorites');
-                                                } else {
-                                                    $scope.visibleItem.queryAll.select('showNodes');
-                                                }
-                                            },
-                                            errorCallback,
-                                        );
-                                    },
-                                    errorCallback,
-                                );
-                            },
-                            errorCallback,
-                        );
-                    },
-                    errorCallback,
-                );
+        $http.get(url + '&type=user')
+            .then((response: { data: AllResponse }) => {
+                    $scope.nodes = new Nodes();
+                    $scope.nodes.users = response.data;
+                    return $http.get(url + '&type=page');
+                },
+                errorCallback,
+            ).then((response: { data: AllResponse }) => {
+                if ($scope.nodes === null) {
+                    return;
+                }
+                $scope.nodes.pages = response.data;
+                return $http.get(url + '&type=event');
             },
             errorCallback,
+        ).then((response: { data: AllResponse }) => {
+                if ($scope.nodes === null) {
+                    return;
+                }
+                $scope.nodes.events = response.data;
+                return $http.get(url + '&type=place');
+            },
+            errorCallback,
+        ).then((response: { data: AllResponse }) => {
+                if ($scope.nodes === null) {
+                    return;
+                }
+                $scope.nodes.places = response.data;
+                return $http.get(url + '&type=group');
+            },
+            errorCallback,
+        ).then((response: { data: AllResponse }) => {
+                if ($scope.nodes === null) {
+                    return;
+                }
+                $scope.nodes.groups = response.data;
+                $scope.visibleItem.select('queryAll');
+                if ($scope.activeType === 'favorites') {
+                    $scope.visibleItem.queryAll.select(
+                        'showFavorites');
+                } else {
+                    $scope.visibleItem.queryAll.select('showNodes');
+                }
+            },
+            errorCallback
         );
 
         $scope.visibleItem.select('queryAll');
@@ -268,15 +263,15 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
         $scope.visibleItem.querySpecific.select('showProgressBar');
 
         $http({
-                  method: 'Get',
-                  url: 'http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=specific&id=' + node.id,
-              }).then(function successCallback(response: { data: SpecificResponse }) {
-                          $scope.visibleItem.select('querySpecific');
-                          $scope.visibleItem.querySpecific.select('showResults');
-                          $scope.detail = response.data;
-                      }, function errorCallback() {
-                          alert('error');
-                      },
+            method: 'Get',
+            url: 'http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=specific&id=' + node.id,
+        }).then(function successCallback(response: { data: SpecificResponse }) {
+                $scope.visibleItem.select('querySpecific');
+                $scope.visibleItem.querySpecific.select('showResults');
+                $scope.detail = response.data;
+            }, function errorCallback() {
+                alert('error');
+            },
         );
     };
 
