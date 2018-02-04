@@ -162,51 +162,53 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             console.log(response);
         }
 
-        $http.get(url + '&type=user')
-            .then((response: { data: AllResponse }) => {
-                    $scope.nodes = new Nodes();
-                    $scope.nodes.users = response.data;
-                    return $http.get(url + '&type=page');
-                },
-                errorCallback,
-            ).then((response: { data: AllResponse }) => {
-                if ($scope.nodes === null) {
-                    return;
-                }
-                $scope.nodes.pages = response.data;
-                return $http.get(url + '&type=event');
-            },
-            errorCallback,
+        $http.get(
+            url + '&type=user'
         ).then((response: { data: AllResponse }) => {
-                if ($scope.nodes === null) {
-                    return;
-                }
-                $scope.nodes.events = response.data;
-                return $http.get(url + '&type=place');
-            },
-            errorCallback,
-        ).then((response: { data: AllResponse }) => {
-                if ($scope.nodes === null) {
-                    return;
-                }
-                $scope.nodes.places = response.data;
-                return $http.get(url + '&type=group');
-            },
-            errorCallback,
-        ).then((response: { data: AllResponse }) => {
-                if ($scope.nodes === null) {
-                    return;
-                }
-                $scope.nodes.groups = response.data;
-                $scope.visibleItem.select('queryAll');
+            $scope.nodes = new Nodes();
+            $scope.nodes.users = response.data;
+            return $http.get(url + '&type=page');
+        }).then((response: { data: AllResponse }) => {
+            // if ($scope.nodes === null) {
+            //     return;
+            // }
+            $scope.nodes = ($scope.nodes !== null) ? $scope.nodes : new Nodes();
+            $scope.nodes.pages = response.data;
+            return $http.get(url + '&type=event');
+        }).then((response: { data: AllResponse }) => {
+            if ($scope.nodes === null) {
+                return;
+            }
+            $scope.nodes.events = response.data;
+            return $http.get(url + '&type=place');
+        }).then((response: { data: AllResponse }) => {
+            if ($scope.nodes === null) {
+                return;
+            }
+            $scope.nodes.places = response.data;
+            return $http.get(url + '&type=group');
+        }).then((response: { data: AllResponse }) => {
+            if ($scope.nodes === null) {
+                return;
+            }
+            $scope.nodes.groups = response.data;
+            $scope.visibleItem.select('queryAll');
+            if ($scope.activeType === 'favorites') {
+                $scope.visibleItem.queryAll.select('showFavorites');
+            } else {
+                $scope.visibleItem.queryAll.select('showNodes');
+            }
+        }).catch(
+            (reason: any) => {
+                alert('error');
+                console.log(reason);
+
                 if ($scope.activeType === 'favorites') {
-                    $scope.visibleItem.queryAll.select(
-                        'showFavorites');
+                    $scope.visibleItem.queryAll.select('showFavorites');
                 } else {
                     $scope.visibleItem.queryAll.select('showNodes');
                 }
-            },
-            errorCallback
+            }
         );
 
         $scope.visibleItem.select('queryAll');
