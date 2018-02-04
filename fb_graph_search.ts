@@ -107,7 +107,7 @@ class QuerySpecific {
 
 interface AngularScope {
     activeNode: NodeData | null,
-    nodes: Nodes | null,
+    nodes: Nodes,
     keyword: string,
     visibleItem: VisibleItem,
     favorites: NodeData[],
@@ -138,7 +138,7 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
 
     $scope.clearClicked = function () {
         $scope.keyword = '';
-        $scope.nodes = null;
+        $scope.nodes = new Nodes();
         $scope.visibleItem.select('queryAll');
         if ($scope.activeType === 'favorites') {
             $scope.visibleItem.queryAll.select('showFavorites');
@@ -157,40 +157,22 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
 
         let url = `http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
 
-        function errorCallback(response: string) {
-            alert('error');
-            console.log(response);
-        }
-
+        $scope.nodes = new Nodes();
         $http.get(
             url + '&type=user'
         ).then((response: { data: AllResponse }) => {
-            $scope.nodes = new Nodes();
             $scope.nodes.users = response.data;
             return $http.get(url + '&type=page');
         }).then((response: { data: AllResponse }) => {
-            // if ($scope.nodes === null) {
-            //     return;
-            // }
-            $scope.nodes = ($scope.nodes !== null) ? $scope.nodes : new Nodes();
             $scope.nodes.pages = response.data;
             return $http.get(url + '&type=event');
         }).then((response: { data: AllResponse }) => {
-            if ($scope.nodes === null) {
-                return;
-            }
             $scope.nodes.events = response.data;
             return $http.get(url + '&type=place');
         }).then((response: { data: AllResponse }) => {
-            if ($scope.nodes === null) {
-                return;
-            }
             $scope.nodes.places = response.data;
             return $http.get(url + '&type=group');
         }).then((response: { data: AllResponse }) => {
-            if ($scope.nodes === null) {
-                return;
-            }
             $scope.nodes.groups = response.data;
             $scope.visibleItem.select('queryAll');
             if ($scope.activeType === 'favorites') {
@@ -224,9 +206,6 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
     // keep track of favorites
     const favorites = localStorage.getItem('favorites');
     $scope.favorites = (favorites !== null) ? JSON.parse(favorites) : {};
-    // $scope.favorites = (localStorage.getItem('favorites') !== null)
-    //     ? JSON.parse(localStorage.getItem('favorites'))
-    //     : {};
 
     $scope.isFavorite = function (node: NodeData) {
         for (const favoriteId in $scope.favorites) {
