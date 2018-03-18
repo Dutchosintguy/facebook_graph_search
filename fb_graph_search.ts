@@ -157,41 +157,47 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
 
         let url = `http://graphsearch.yj83leetest.space/fb_graph_search_json.php?target=all&keyword=${$scope.keyword}`;
 
+        // TODO: use promise all
         $scope.nodes = new Nodes();
-        $http.get(
-            url + '&type=user'
-        ).then((response: { data: AllResponse }) => {
-            $scope.nodes.users = response.data;
-            return $http.get(url + '&type=page');
-        }).then((response: { data: AllResponse }) => {
-            $scope.nodes.pages = response.data;
-            return $http.get(url + '&type=event');
-        }).then((response: { data: AllResponse }) => {
-            $scope.nodes.events = response.data;
-            return $http.get(url + '&type=place');
-        }).then((response: { data: AllResponse }) => {
-            $scope.nodes.places = response.data;
-            return $http.get(url + '&type=group');
-        }).then((response: { data: AllResponse }) => {
-            $scope.nodes.groups = response.data;
+        type Responses = [
+            { data: AllResponse },
+            { data: AllResponse },
+            { data: AllResponse },
+            { data: AllResponse },
+            { data: AllResponse }
+            ]
+        Promise.all([
+            $http.get(url + '&type=user'),
+            $http.get(url + '&type=page'),
+            $http.get(url + '&type=event'),
+            $http.get(url + '&type=place'),
+            $http.get(url + '&type=group'),
+        ]).then((responses: Responses) => {
+            const [usersData, pagesData, eventsData, placesData, groupsData] = responses;
+            $scope.nodes.users = usersData.data;
+            $scope.nodes.pages = pagesData.data;
+            $scope.nodes.events = eventsData.data;
+            $scope.nodes.places = placesData.data;
+            $scope.nodes.groups = groupsData.data;
+
             $scope.visibleItem.select('queryAll');
             if ($scope.activeType === 'favorites') {
                 $scope.visibleItem.queryAll.select('showFavorites');
             } else {
                 $scope.visibleItem.queryAll.select('showNodes');
+                // needed code blow to correctly rerender
+                $scope.$apply();
             }
-        }).catch(
-            (reason: any) => {
-                alert('error');
-                console.log(reason);
+        }).catch((reason: any) => {
+            alert('error');
+            console.log(reason);
 
-                if ($scope.activeType === 'favorites') {
-                    $scope.visibleItem.queryAll.select('showFavorites');
-                } else {
-                    $scope.visibleItem.queryAll.select('showNodes');
-                }
+            if ($scope.activeType === 'favorites') {
+                $scope.visibleItem.queryAll.select('showFavorites');
+            } else {
+                $scope.visibleItem.queryAll.select('showNodes');
             }
-        );
+        });
 
         $scope.visibleItem.select('queryAll');
         if ($scope.activeType === 'favorites') {
