@@ -172,13 +172,15 @@ angular.module('myApp', ['ngAnimate']).controller('myCtrl', function ($scope: An
             $http.get(url + '&type=event'),
             $http.get(url + '&type=place'),
             $http.get(url + '&type=group'),
-        ]).then((responses: Responses) => {
+        ].map(p => p.catch((e: any) => e))).then((responses: Responses | any) => {
+            // when $http.get failed, response.data will be null
             const [usersData, pagesData, eventsData, placesData, groupsData] = responses;
             $scope.nodes.users = usersData.data;
             $scope.nodes.pages = pagesData.data;
             $scope.nodes.events = eventsData.data;
             $scope.nodes.places = placesData.data;
             $scope.nodes.groups = groupsData.data;
+            console.log(groupsData);
 
             $scope.visibleItem.select('queryAll');
             if ($scope.activeType === 'favorites') {
